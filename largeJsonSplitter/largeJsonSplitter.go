@@ -2,37 +2,35 @@ package largeJsonSplitter
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"reflect"
 	"strings"
 )
 
-func SplitJson(inputPath *string) {
+func SplitJson(inputPath *string) error {
 	file, err := os.Open(*inputPath)
 	if err != nil {
-		panic(err)
-		return
+		return err
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			panic(err)
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			fmt.Println(closeErr)
 		}
-	}(file)
+	}()
 
 	decoder := json.NewDecoder(file)
 	var data interface{}
 
 	for decoder.More() {
-		err := decoder.Decode(&data)
-		if err != nil {
-			panic(err)
+		if decodeErr := decoder.Decode(&data); decodeErr != nil {
+			return decodeErr
 		}
 
 		resMap, ok := data.(map[string]interface{})
 		if !ok {
-			panic("JSON decoding error")
+			return errors.New("JSON is not an object")
 		}
 
 		parts := strings.Split(*inputPath, "/")
@@ -43,15 +41,22 @@ func SplitJson(inputPath *string) {
 
 		for key, value := range resMap {
 			if reflect.TypeOf(value).Kind() == reflect.Map {
-				processMap(newFolderPath, key, resMap, value.(map[string]interface{}))
+				processErr := processMap(newFolderPath, key, resMap, value.(map[string]interface{}))
+				if processErr != nil {
+					return processErr
+				}
 			}
 		}
 
-		writeJSONFile(newFolderPath, nameWithoutExtension, resMap)
+		writeJsonErr := writeJSONFile(newFolderPath, nameWithoutExtension, resMap)
+		if writeJsonErr != nil {
+			return writeJsonErr
+		}
 	}
+	return nil
 }
 
-func processMap(currentPath string, key string, originalMap map[string]interface{}, currentMap map[string]interface{}) bool {
+func processMap(currentPath string, key string, originalMap map[string]interface{}, currentMap map[string]interface{}) error {
 	newMap := make(map[string]interface{})
 	nextPath := fmt.Sprintf("%s/%s", currentPath, key)
 
@@ -59,10 +64,10 @@ func processMap(currentPath string, key string, originalMap map[string]interface
 		if reflect.TypeOf(value).Kind() == reflect.Map {
 			subMap, ok := value.(map[string]interface{})
 			if ok {
-				// Recursively process the subMap
-				shouldContinue := processMap(nextPath, innerKey, newMap, subMap)
-				if !shouldContinue {
-					return false
+				// Recursive call
+				err := processMap(nextPath, innerKey, newMap, subMap)
+				if err != nil {
+					return err
 				}
 			}
 		} else {
@@ -71,39 +76,40 @@ func processMap(currentPath string, key string, originalMap map[string]interface
 	}
 
 	if len(newMap) > 0 {
-		writeJSONFile(nextPath, key, newMap)
+		writeErr := writeJSONFile(nextPath, key, newMap)
+		if writeErr != nil {
+			return writeErr
+		}
 	}
 
 	delete(originalMap, key)
 
-	return true
+	return nil
 }
 
-func writeJSONFile(path string, filename string, data map[string]interface{}) {
+func writeJSONFile(path string, filename string, data map[string]interface{}) error {
 	newPath := fmt.Sprintf("%s/", path)
 	err := os.MkdirAll(newPath, 0700)
 	if err != nil {
-		panic(err)
-		return
+		return err
 	}
 
 	newFilePath := fmt.Sprintf("%s%s.json", newPath, filename)
 	newFile, err := os.Create(newFilePath)
 	if err != nil {
-		panic(err)
-		return
+		return err
 	}
-	defer func(newFile *os.File) {
-		err := newFile.Close()
-		if err != nil {
-			panic(err)
+	defer func() {
+		if closeErr := newFile.Close(); closeErr != nil {
+			fmt.Println(closeErr)
 		}
-	}(newFile)
+	}()
 
 	encoder := json.NewEncoder(newFile)
 	encoder.SetIndent("", "  ")
-	err = encoder.Encode(data)
-	if err != nil {
-		panic(err)
+	if err := encoder.Encode(data); err != nil {
+		return err
 	}
+
+	return nil
 }
