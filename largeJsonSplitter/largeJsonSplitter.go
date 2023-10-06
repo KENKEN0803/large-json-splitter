@@ -53,12 +53,14 @@ func SplitJson(inputPath *string) {
 
 func processMap(currentPath string, key string, originalMap map[string]interface{}, currentMap map[string]interface{}) bool {
 	newMap := make(map[string]interface{})
+	nextPath := fmt.Sprintf("%s/%s", currentPath, key)
 
 	for innerKey, value := range currentMap {
 		if reflect.TypeOf(value).Kind() == reflect.Map {
 			subMap, ok := value.(map[string]interface{})
 			if ok {
-				shouldContinue := processMap(currentPath+"/"+key, innerKey, newMap, subMap)
+				// Recursively process the subMap
+				shouldContinue := processMap(nextPath, innerKey, newMap, subMap)
 				if !shouldContinue {
 					return false
 				}
@@ -69,7 +71,7 @@ func processMap(currentPath string, key string, originalMap map[string]interface
 	}
 
 	if len(newMap) > 0 {
-		writeJSONFile(currentPath, key, newMap)
+		writeJSONFile(nextPath, key, newMap)
 	}
 
 	delete(originalMap, key)
