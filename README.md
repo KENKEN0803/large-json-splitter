@@ -78,7 +78,7 @@ go get github.com/KENKEN0803/large-json-splitter
 The large-json-splitter library provides both a command-line executable and a Go function for splitting JSON files.
 
 ## Executable Usage
-
+Executables can be found on [release page](https://github.com/KENKEN0803/large-json-splitter/releases).
 You can use the executable as follows:
 
 ```bash
