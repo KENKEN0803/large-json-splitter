@@ -14,7 +14,7 @@ func main() {
 		panic("Input file path not specified")
 	}
 
-	err := largeJsonSplitter.SplitJson(inputPath)
+	err := largeJsonSplitter.SplitJson(*inputPath)
 	if err != nil {
 		panic(err)
 	}

@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-func SplitJson(inputPath *string) error {
-	file, err := os.Open(*inputPath)
+func SplitJson(inputPath string) error {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return err
 	}
@@ -33,9 +33,9 @@ func SplitJson(inputPath *string) error {
 			return errors.New("JSON is not an object")
 		}
 
-		parts := strings.Split(*inputPath, "/")
+		parts := strings.Split(inputPath, "/")
 		originalFilename := parts[len(parts)-1]
-		originalFolderPath := strings.TrimSuffix(*inputPath, originalFilename)
+		originalFolderPath := strings.TrimSuffix(inputPath, originalFilename)
 		nameWithoutExtension := strings.TrimSuffix(originalFilename, ".json")
 		newFolderPath := fmt.Sprintf("%s/%s/", originalFolderPath, nameWithoutExtension)
 
