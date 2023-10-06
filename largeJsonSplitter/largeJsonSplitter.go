@@ -11,13 +11,13 @@ import (
 func SplitJson(inputPath *string) {
 	file, err := os.Open(*inputPath)
 	if err != nil {
-		panic("File open error")
+		panic(err)
 		return
 	}
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			panic("File close error")
+			panic(err)
 		}
 	}(file)
 
@@ -27,7 +27,7 @@ func SplitJson(inputPath *string) {
 	for decoder.More() {
 		err := decoder.Decode(&data)
 		if err != nil {
-			panic("JSON decoding error")
+			panic(err)
 		}
 
 		resMap, ok := data.(map[string]interface{})
@@ -79,22 +79,22 @@ func processMap(currentPath string, key string, originalMap map[string]interface
 
 func writeJSONFile(path string, filename string, data map[string]interface{}) {
 	newPath := fmt.Sprintf("%s/", path)
-	err := os.MkdirAll(newPath, os.ModePerm)
+	err := os.MkdirAll(newPath, 0700)
 	if err != nil {
-		panic("Folder creation error")
+		panic(err)
 		return
 	}
 
 	newFilePath := fmt.Sprintf("%s%s.json", newPath, filename)
 	newFile, err := os.Create(newFilePath)
 	if err != nil {
-		panic("File creation error")
+		panic(err)
 		return
 	}
 	defer func(newFile *os.File) {
 		err := newFile.Close()
 		if err != nil {
-			panic("File close error")
+			panic(err)
 		}
 	}(newFile)
 
@@ -102,6 +102,6 @@ func writeJSONFile(path string, filename string, data map[string]interface{}) {
 	encoder.SetIndent("", "  ")
 	err = encoder.Encode(data)
 	if err != nil {
-		panic("JSON encoding error")
+		panic(err)
 	}
 }
