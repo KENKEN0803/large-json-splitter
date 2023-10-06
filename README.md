@@ -4,6 +4,67 @@ Large JSON Splitter is a Go library that reads JSON data as a stream and extract
 
 ![GitHub](https://img.shields.io/github/license/KENKEN0803/large-json-splitter)
 
+## Input
+```json5
+// Original sample.json
+{
+  "stringValue": "value",
+  "intValue": 1,
+  "boolValue": true,
+  "arrayValue": [
+    "value1",
+    "value2"
+  ],
+  
+  "objectValue": {
+    "innerStringValue": "value",
+    "innerIntValue": 1,
+    "innerBoolValue": true,
+    "innerArrayValue": [
+      "value1",
+      "value2"
+    ]
+  }
+  
+}
+```
+
+## Output
+```
+├── sample
+│   ├── objectValue
+│   │   └── objectValue.json
+│   └── sample.json
+└── sample.json
+```
+```json5
+// sample.json with objectValue key removed
+{
+  "arrayValue": [
+    "value1",
+    "value2"
+  ],
+  "boolValue": true,
+  "intValue": 1,
+  "stringValue": "value"
+}
+```
+
+```json5
+// objectValue.json
+{
+  "innerArrayValue": [
+    "value1",
+    "value2"
+  ],
+  "innerBoolValue": true,
+  "innerIntValue": 1,
+  "innerStringValue": "value"
+}
+```
+
+
+
 ## Installation
 
 You can install this library using `go get`:
