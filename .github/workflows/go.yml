@@ -20,7 +20,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: '^1.21.1'
+        go-version: '^1.21.2'
 
     # Linux
     - name: Build linux x86-64 artifact
