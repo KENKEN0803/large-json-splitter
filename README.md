@@ -1,8 +1,8 @@
-# Large JSON Splitter
+# Large JSON Splitter ![GitHub](https://img.shields.io/github/license/KENKEN0803/large-json-splitter)
 
 Large JSON Splitter is a Go library that reads JSON data as a stream and extracts objects, saving them as separate JSON files.
 
-![GitHub](https://img.shields.io/github/license/KENKEN0803/large-json-splitter)
+The generated JSON files will be placed in subdirectories under the original input file's location.
 
 ## Input
 ```json5
@@ -82,10 +82,12 @@ Executables can be found on [release page](https://github.com/KENKEN0803/large-j
 You can use the executable as follows:
 
 ```bash
-./large-json-splitter --i ./data/141.json
+./large-json-splitter --i ./data/141.json --d "  "
 ```
 
-- --input, --i: Specifies the input JSON file to process.
+- --input, --i: (Required) Specifies the input JSON file to process.
+- --indent, --d: (Optional) Specifies the indent string to use when writing the output JSON files.
+If not specified, the output JSON files will be minified.
 
 ## Go Library Usage
 ```go
@@ -97,9 +99,9 @@ import (
 )
 
 func main() {
-    inputPath := "89.json"
+    inputPath := "sample.json"
     
-    if err := largeJsonSplitter.SplitJson(inputPath); err != nil {
+    if err := largeJsonSplitter.SplitJson(inputPath, ""); err != nil {
         fmt.Printf("Error: %v\n", err)
     }
 }

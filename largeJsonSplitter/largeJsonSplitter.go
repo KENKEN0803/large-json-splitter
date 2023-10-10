@@ -9,7 +9,18 @@ import (
 	"strings"
 )
 
-func SplitJson(inputPath string) error {
+// SplitJson reads a JSON file from the specified inputPath and splits it into multiple JSON files
+// based on its structure. The generated JSON files will be placed in subdirectories under the
+// original input file's location.
+//
+// Parameters:
+//   - inputPath: The path to the input JSON file.
+//   - indentString: The string to be used for indentation in the generated JSON files. An empty string
+//     results in no indentation.
+//
+// Returns:
+//   - An error if any issues occur during the splitting process.
+func SplitJson(inputPath string, indentString string) error {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -45,14 +56,14 @@ func SplitJson(inputPath string) error {
 
 		for key, value := range resMap {
 			if reflect.TypeOf(value).Kind() == reflect.Map {
-				processErr := processMap(newFolderPath, key, resMap, value.(map[string]interface{}))
+				processErr := processMap(newFolderPath, key, resMap, value.(map[string]interface{}), indentString)
 				if processErr != nil {
 					return processErr
 				}
 			}
 		}
 
-		writeJsonErr := writeJSONFile(newFolderPath, nameWithoutExtension, resMap)
+		writeJsonErr := writeJSONFile(newFolderPath, nameWithoutExtension, resMap, indentString)
 		if writeJsonErr != nil {
 			return writeJsonErr
 		}
@@ -60,7 +71,7 @@ func SplitJson(inputPath string) error {
 	return nil
 }
 
-func processMap(currentPath string, key string, originalMap map[string]interface{}, currentMap map[string]interface{}) error {
+func processMap(currentPath string, key string, originalMap map[string]interface{}, currentMap map[string]interface{}, indentString string) error {
 	newMap := make(map[string]interface{})
 	nextPath := fmt.Sprintf("%s/%s", currentPath, key)
 
@@ -69,7 +80,7 @@ func processMap(currentPath string, key string, originalMap map[string]interface
 			subMap, ok := value.(map[string]interface{})
 			if ok {
 				// Recursive call
-				err := processMap(nextPath, innerKey, newMap, subMap)
+				err := processMap(nextPath, innerKey, newMap, subMap, indentString)
 				if err != nil {
 					return err
 				}
@@ -80,7 +91,7 @@ func processMap(currentPath string, key string, originalMap map[string]interface
 	}
 
 	if len(newMap) > 0 {
-		writeErr := writeJSONFile(nextPath, key, newMap)
+		writeErr := writeJSONFile(nextPath, key, newMap, indentString)
 		if writeErr != nil {
 			return writeErr
 		}
@@ -91,7 +102,7 @@ func processMap(currentPath string, key string, originalMap map[string]interface
 	return nil
 }
 
-func writeJSONFile(path string, filename string, data map[string]interface{}) error {
+func writeJSONFile(path string, filename string, data map[string]interface{}, indentString string) error {
 	newPath := fmt.Sprintf("%s/", path)
 	err := os.MkdirAll(newPath, 0700)
 	if err != nil {
@@ -110,7 +121,9 @@ func writeJSONFile(path string, filename string, data map[string]interface{}) er
 	}()
 
 	encoder := json.NewEncoder(newFile)
-	encoder.SetIndent("", "  ")
+	if indentString != "" {
+		encoder.SetIndent("", indentString)
+	}
 	if err := encoder.Encode(data); err != nil {
 		return err
 	}
