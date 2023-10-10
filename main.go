@@ -2,20 +2,29 @@ package main
 
 import (
 	"flag"
+	"log"
+	"time"
+
 	"github.com/KENKEN0803/large-json-splitter/largeJsonSplitter"
 )
 
 func main() {
-	inputPath := flag.String("input", "", "Input JSON file path")
-	flag.StringVar(inputPath, "i", "", "Input JSON file path")
+	inputFilePath := flag.String("input", "", "Input JSON file path")
+	flag.StringVar(inputFilePath, "i", "", "Input JSON file path")
 	flag.Parse()
 
-	if *inputPath == "" {
-		panic("Input file path not specified")
+	if *inputFilePath == "" {
+		log.Fatalf("Input file path not specified. Usage: ./large-json-splitter -i <input-file-path>")
 	}
 
-	err := largeJsonSplitter.SplitJson(*inputPath)
+	startTime := time.Now()
+	log.Printf("Starting large-json-splitter for file: %s", *inputFilePath)
+
+	err := largeJsonSplitter.SplitJson(*inputFilePath)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error splitting JSON: %v", err)
 	}
+
+	elapsedTime := time.Since(startTime)
+	log.Printf("Output files successfully created in %s. Elapsed time: %s", *inputFilePath, elapsedTime)
 }
