@@ -56,7 +56,7 @@ jobs:
       run: go build -trimpath -o bin/large-json-splitter_${GOOS}_${GOARCH}.exe
 
     - name: Generate change log for release
-      run: curl -sSf 'https://raw.githubusercontent.com/KENKEN0803/changelog.sh/main/changelog.sh' | zsh -s -- '' '' --md > changelog.md
+      run: curl -sSf 'https://raw.githubusercontent.com/KENKEN0803/large-json-splitter/changelog.sh/changelog.sh' | zsh -s -- '' '' --md > changelog.md
 
     - name: Release artifacts
       uses: softprops/action-gh-release@v1
