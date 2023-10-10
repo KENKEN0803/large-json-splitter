@@ -36,8 +36,12 @@ func SplitJson(inputPath string) error {
 		parts := strings.Split(inputPath, "/")
 		originalFilename := parts[len(parts)-1]
 		originalFolderPath := strings.TrimSuffix(inputPath, originalFilename)
+		// If just filename is specified, use current directory
+		if originalFolderPath == "" {
+			originalFolderPath = "./"
+		}
 		nameWithoutExtension := strings.TrimSuffix(originalFilename, ".json")
-		newFolderPath := fmt.Sprintf("%s/%s/", originalFolderPath, nameWithoutExtension)
+		newFolderPath := fmt.Sprintf("%s%s", originalFolderPath, nameWithoutExtension)
 
 		for key, value := range resMap {
 			if reflect.TypeOf(value).Kind() == reflect.Map {
